@@ -182,7 +182,11 @@ False positive cost = 1 unit
 False negative cost = 5 units
 ```
 
-These are simulated values, not real telecom costs.
+These are simulated values used for decision-analysis experiments, not measured telecom business costs.
+
+The 1:5 ratio is an illustrative assumption chosen to represent a situation where failing to identify a real churner is considered more costly than unnecessarily contacting a customer who would not churn.
+
+The project does not claim that 1:5 is the true economic ratio for a telecom operator. A real deployment would require the business to estimate costs such as campaign-contact expense, retention-offer expense, expected customer lifetime value, probability of successful retention, and the loss associated with an undetected churner.
 
 ### Validation Results
 
@@ -327,6 +331,12 @@ ROC-AUC:   0.8199–0.8712
 Random Forest intervals overlap substantially, so the project does not claim clear statistical superiority.
 
 ## Cost Sensitivity
+
+This analysis is performed on the validation set. For each cost scenario, the threshold is selected on that same validation set to minimize the simulated cost.
+
+Therefore, these values should be interpreted as exploratory sensitivity results showing how model and threshold choices change under different assumptions. They are optimistic for performance estimation and should not be treated as independent final-test results.
+
+The purpose of this section is not to identify a universally correct cost ratio, but to demonstrate that the preferred model and threshold depend on business assumptions.
 
 False-positive cost was fixed at 1 unit.
 
