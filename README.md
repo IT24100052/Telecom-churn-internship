@@ -248,6 +248,34 @@ Simulated business cost:
 451 units
 ```
 
+## Business-Rule Baseline Comparison
+
+To check whether the machine-learning model adds value beyond a simple operational rule, the final held-out test split was also evaluated using several baselines under the same simulated cost assumption:
+
+- false positive cost = 1 unit
+- false negative cost = 5 units
+
+| Strategy | Precision | Recall | F1 | Flagged Rate | Cost |
+|---|---:|---:|---:|---:|---:|
+| Predict nobody churns | 0.0000 | 0.0000 | 0.0000 | 0.00% | 1405 |
+| Predict everybody churns | 0.2658 | 1.0000 | 0.4200 | 100.00% | 776 |
+| Flag all month-to-month customers | 0.4248 | 0.8648 | 0.5698 | 54.12% | 519 |
+| Logistic Regression | 0.4547 | 0.8932 | 0.6026 | 52.22% | 451 |
+
+The month-to-month rule is a strong baseline.
+
+Compared with that rule, Logistic Regression:
+
+- reduced simulated cost from 519 to 451 units,
+- reduced cost by approximately 13.1%,
+- identified 8 additional churners,
+- produced 28 fewer false positives,
+- and flagged a slightly smaller share of customers.
+
+This means the ML model adds measurable value, but the improvement over a simple business rule is moderate rather than dramatic.
+
+The comparison also highlights why simple baselines should be included before claiming that a machine-learning model provides meaningful business improvement.
+
 ## Bootstrap Confidence Intervals
 
 95% bootstrap confidence intervals for Logistic Regression:
