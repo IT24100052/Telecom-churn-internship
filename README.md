@@ -1,8 +1,8 @@
-# Telecom Customer Churn Prediction
+﻿# Telecom Customer Churn Prediction
 
 An end-to-end machine learning project for predicting telecom customer churn using customer profile, service, contract, and billing information.
 
-This project was built as a practical AI/ML internship preparation exercise and covers data validation, SQL analysis, preprocessing, model comparison, business-oriented threshold selection, uncertainty analysis, API deployment, testing, documentation, and Git/GitHub workflow.
+This project was built as a practical AI/ML internship preparation exercise and covers data validation, SQL analysis, preprocessing, model comparison, business-oriented threshold selection, uncertainty analysis, model explainability, API deployment, testing, documentation, and Git/GitHub workflow.
 
 ## Business Problem
 
@@ -28,13 +28,19 @@ Primary source used for this project:
 
 The dataset contains 7,043 customers and 21 original columns.
 
-The raw CSV is intentionally not committed to this repository. Download the dataset from the original IBM source or the Kaggle mirror and place it at `data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv`.
+The raw CSV is intentionally not committed to this repository. Download the dataset from the original IBM source or the Kaggle mirror and place it at:
+
+```text
+data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv
+```
 
 ### Dataset Licence / Usage Note
 
 The commonly used Kaggle listing for this dataset states:
 
-`Data files © Original Authors`
+```text
+Data files Â© Original Authors
+```
 
 Because the dataset does not present a clearly stated permissive licence on that listing, this repository does not redistribute the raw CSV.
 
@@ -72,10 +78,10 @@ Tenure churn:
 
 | Tenure | Churn Rate |
 |---|---:|
-| 0–12 months | 47.44% |
-| 13–24 months | 28.71% |
-| 25–48 months | 20.39% |
-| 49–72 months | 9.51% |
+| 0â€“12 months | 47.44% |
+| 13â€“24 months | 28.71% |
+| 25â€“48 months | 20.39% |
+| 49â€“72 months | 9.51% |
 
 Average monthly charges:
 
@@ -273,7 +279,7 @@ Across 1,000 paired bootstrap samples:
 
 - mean LR - RF cost difference: -26.17 units
 - median difference: -26 units
-- 95% bootstrap interval: [-66.03, 14.00]
+- 95% bootstrap interval: `[-66.03, 14.00]`
 - Logistic Regression had lower cost in 89.5% of bootstrap samples
 
 Because the 95% interval includes zero, the evidence is not strong enough to conclude that Logistic Regression consistently has lower business cost than Random Forest.
@@ -282,10 +288,10 @@ Therefore, the two models should be treated as broadly competitive under this si
 
 Logistic Regression remains the deployment model because:
 
-- its observed cost is slightly lower,
-- its predictive performance is competitive,
-- it is simpler,
-- and it is easier to interpret and explain.
+- its observed cost is slightly lower
+- its predictive performance is competitive
+- it is simpler
+- it is easier to interpret and explain
 
 The model choice should therefore not be described as a decisive performance win over Random Forest.
 
@@ -307,11 +313,11 @@ The month-to-month rule is a strong baseline.
 
 Compared with that rule, Logistic Regression:
 
-- reduced simulated cost from 519 to 451 units,
-- reduced cost by approximately 13.1%,
-- identified 8 additional churners,
-- produced 28 fewer false positives,
-- and flagged a slightly smaller share of customers.
+- reduced simulated cost from 519 to 451 units
+- reduced cost by approximately 13.1%
+- identified 8 additional churners
+- produced 28 fewer false positives
+- flagged a slightly smaller share of customers
 
 This means the ML model adds measurable value, but the improvement over a simple business rule is moderate rather than dramatic.
 
@@ -322,10 +328,10 @@ The comparison also highlights why simple baselines should be included before cl
 95% bootstrap confidence intervals for Logistic Regression:
 
 ```text
-Precision: 0.4141–0.4991
-Recall:    0.8561–0.9278
-F1:        0.5617–0.6423
-ROC-AUC:   0.8199–0.8712
+Precision: 0.4141â€“0.4991
+Recall:    0.8561â€“0.9278
+F1:        0.5617â€“0.6423
+ROC-AUC:   0.8199â€“0.8712
 ```
 
 Random Forest intervals overlap substantially, so the project does not claim clear statistical superiority.
@@ -354,18 +360,47 @@ Main lesson:
 
 ## Explainability
 
-Earlier permutation importance highlighted:
+Explainability is now based on the deployed Logistic Regression model rather than the earlier Random Forest experiments.
 
-- Contract
-- InternetService
-- tenure
-- TotalCharges
-- PaperlessBilling
-- OnlineBackup
-- StreamingTV
-- PaymentMethod
+Two complementary approaches are used:
 
-These are predictive relationships, not causal claims.
+1. **Raw-feature permutation importance** on the validation set measures how much validation ROC-AUC decreases when each original feature is shuffled.
+2. **Logistic Regression coefficients** show the direction and strength of associations inside the fitted model after preprocessing.
+
+### Raw-Feature Permutation Importance
+
+The strongest validation-set dependencies were:
+
+| Feature | Mean ROC-AUC Drop |
+|---|---:|
+| tenure | 0.1840 |
+| Contract | 0.0378 |
+| InternetService | 0.0371 |
+| TotalCharges | 0.0227 |
+| MonthlyCharges | 0.0162 |
+
+`tenure` showed the largest predictive dependence by a substantial margin.
+
+### Logistic Regression Associations
+
+Some of the strongest fitted associations include:
+
+- higher tenure â†’ lower predicted churn
+- two-year contract â†’ lower predicted churn
+- month-to-month contract â†’ higher predicted churn
+- fiber-optic internet â†’ higher predicted churn
+- DSL internet â†’ lower predicted churn
+
+These results describe how the trained model behaves. They do **not** demonstrate that these customer characteristics cause churn.
+
+Permutation importance can also be affected by correlated or overlapping predictors, and Logistic Regression coefficients depend on the model's preprocessing and encoded feature representation.
+
+The complete evidence is saved in:
+
+```text
+reports/logistic_permutation_importance.csv
+reports/logistic_coefficients.csv
+```
 
 ## API
 
@@ -432,6 +467,8 @@ Tests cover:
 - inconsistent phone service
 - inconsistent internet service
 
+If the generated model artifact is not present, prediction-dependent tests are skipped with a clear instruction to regenerate the model.
+
 ## Reproducing from a Fresh Clone
 
 ### 1. Clone
@@ -450,8 +487,16 @@ py -3.11 -m venv .venv
 
 ### 3. Install dependencies
 
+For project runtime dependencies:
+
 ```powershell
 python -m pip install -r requirements.txt
+```
+
+For development and automated testing:
+
+```powershell
+python -m pip install -r requirements-dev.txt
 ```
 
 ### 4. Add dataset
@@ -487,7 +532,32 @@ models/telecom_churn_model.joblib
 python -m src.cost_sensitivity_analysis
 ```
 
-### 8. Test prediction
+### 8. Run business-rule baseline comparison
+
+```powershell
+python -m src.business_rule_baselines
+```
+
+### 9. Run paired bootstrap model comparison
+
+```powershell
+python -m src.paired_bootstrap_comparison
+```
+
+### 10. Generate Logistic Regression explainability evidence
+
+```powershell
+python -m src.explain_logistic_regression
+```
+
+This generates:
+
+```text
+reports/logistic_permutation_importance.csv
+reports/logistic_coefficients.csv
+```
+
+### 11. Test prediction
 
 ```powershell
 python -m src.predict_customer
@@ -502,13 +572,13 @@ Prediction: Churn
 Churn probability: 75.55%
 ```
 
-### 9. Run tests
+### 12. Run tests
 
 ```powershell
 python -m pytest -q
 ```
 
-### 10. Start API
+### 13. Start API
 
 ```powershell
 uvicorn src.api:app --reload --port 8001
@@ -517,7 +587,7 @@ uvicorn src.api:app --reload --port 8001
 ## Main Limitations
 
 - public dataset
-- simulated cost assumptions
+- simulated cost assumptions rather than measured telecom economics
 - no real campaign-capacity constraint
 - no temporal prediction horizon
 - no production monitoring
@@ -527,6 +597,7 @@ uvicorn src.api:app --reload --port 8001
 - no production authentication
 - no cloud deployment
 - no external untouched evaluation dataset
+- permutation importance and coefficients describe model behavior, not causal relationships
 
 ## Key Takeaway
 
@@ -534,23 +605,27 @@ The project demonstrates:
 
 ```text
 Business problem
-→ data validation
-→ cleaning
-→ EDA
-→ SQL
-→ preprocessing
-→ model comparison
-→ CV/tuning
-→ validation threshold selection
-→ cost analysis
-→ uncertainty
-→ held-out evaluation
-→ model serialization
-→ API
-→ validation
-→ testing
-→ documentation
-→ GitHub handover
+â†’ data validation
+â†’ cleaning
+â†’ EDA
+â†’ SQL
+â†’ preprocessing
+â†’ model comparison
+â†’ CV/tuning
+â†’ validation threshold selection
+â†’ simple business-rule baselines
+â†’ cost analysis
+â†’ cost sensitivity
+â†’ uncertainty analysis
+â†’ held-out evaluation
+â†’ explainability
+â†’ model serialization
+â†’ API
+â†’ validation
+â†’ testing
+â†’ reproducibility
+â†’ documentation
+â†’ GitHub handover
 ```
 
-The main lesson is that model choice should be driven by evidence, uncertainty, business costs, and operational constraints rather than a single metric.
+The main lesson is that model choice should be driven by evidence, uncertainty, business costs, operational constraints, and interpretability rather than a single performance metric.
