@@ -1,11 +1,16 @@
+from functools import lru_cache
 from pathlib import Path
 
 import joblib
 import pandas as pd
 
 
-MODEL_PATH = Path(
-    "models/telecom_churn_model.joblib"
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
+MODEL_PATH = (
+    PROJECT_ROOT
+    / "models"
+    / "telecom_churn_model.joblib"
 )
 
 
@@ -32,10 +37,14 @@ REQUIRED_FIELDS = [
 ]
 
 
+@lru_cache(maxsize=1)
 def load_model_bundle():
     """
     Load the selected model, operating threshold,
     and model metadata.
+
+    The result is cached so the model artifact
+    is loaded only once per Python process.
     """
 
     if not MODEL_PATH.exists():
@@ -132,8 +141,7 @@ def validate_customer_data(
 
     if (
         customer_data["tenure"] == 0
-        and
-        customer_data[
+        and customer_data[
             "TotalCharges"
         ] != 0
     ):
