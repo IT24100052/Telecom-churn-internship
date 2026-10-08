@@ -1,160 +1,331 @@
-# Experiment Log
-
-## Project
-Telecom Customer Churn Prediction
+# Experiment Log — Telecom Customer Churn Prediction
 
 ## Objective
-Predict customer churn while prioritizing recall because missing a real churner is assumed to be more costly than contacting some customers who would have stayed.
 
-## Data Preparation
-- Dataset size: 7,043 customers
-- Target: Churn
-- Removed from model features:
-  - customerID
-  - Churn
-- `TotalCharges` contained 11 blank values.
-- All 11 affected customers had tenure = 0.
-- Blank `TotalCharges` values were treated as 0 and converted to numeric.
+Build an end-to-end churn prediction workflow with reproducible preprocessing, model comparison, business-oriented threshold selection, uncertainty analysis, deployment, and testing.
 
-## Initial Train/Test Experiment
-Split:
-- 80% training
-- 20% test
-- stratified by churn
-- random_state = 42
+## Dataset
 
-### Logistic Regression
-Accuracy: 0.8055
+```text
+Rows: 7043
+Columns: 21
+Target: Churn
+```
+
+Target mapping:
+
+```text
+No = 0
+Yes = 1
+```
+
+## Data Quality
+
+`TotalCharges` was loaded as string data.
+
+Findings:
+
+```text
+Blank TotalCharges values: 11
+All affected tenure values: 0
+```
+
+Cleaning rule used:
+
+```text
+blank TotalCharges → 0
+```
+
+This is a dataset-specific assumption.
+
+## EDA
+
+```text
+Overall churn: 26.54%
+Month-to-month: 42.71%
+One year: 11.27%
+Two year: 2.83%
+0–12 months tenure: 47.44%
+49–72 months tenure: 9.51%
+```
+
+## Initial Logistic Regression
+
+```text
+Accuracy:  0.8055
 Precision: 0.6572
-Recall: 0.5588
-F1: 0.6040
-ROC-AUC: 0.8421
+Recall:    0.5588
+F1:        0.6040
+ROC-AUC:   0.8421
+```
 
-### Threshold Analysis
-Threshold 0.30:
-- Precision: 0.5193
-- Recall: 0.7540
-- F1: 0.6150
+Initial threshold analysis:
 
-Threshold 0.40:
-- Precision: 0.5682
-- Recall: 0.6684
-- F1: 0.6143
+| Threshold | Precision | Recall | F1 |
+|---:|---:|---:|---:|
+| 0.30 | 0.5193 | 0.7540 | 0.6150 |
+| 0.40 | 0.5682 | 0.6684 | 0.6143 |
+| 0.50 | 0.6572 | 0.5588 | 0.6040 |
+| 0.60 | 0.7177 | 0.4011 | 0.5146 |
 
-Threshold 0.50:
-- Precision: 0.6572
-- Recall: 0.5588
-- F1: 0.6040
+## Initial Decision Tree
 
-### Decision Tree
-Accuracy: 0.7984
+```text
+Accuracy:  0.7984
 Precision: 0.6347
-Recall: 0.5668
-F1: 0.5989
-ROC-AUC: 0.8297
+Recall:    0.5668
+F1:        0.5989
+ROC-AUC:   0.8297
+```
 
-### Random Forest
-Accuracy: 0.7551
+## Initial Random Forest
+
+```text
+Accuracy:  0.7551
 Precision: 0.5258
-Recall: 0.7888
-F1: 0.6310
-ROC-AUC: 0.8411
+Recall:    0.7888
+F1:        0.6310
+ROC-AUC:   0.8411
+```
 
-## Cross-Validation
-5-fold stratified cross-validation on training data.
+## Initial 5-Fold CV
 
-### Logistic Regression
-Accuracy: 0.8021
-Precision: 0.6529
-Recall: 0.5431
+Logistic Regression:
+
+```text
 F1: 0.5923
 ROC-AUC: 0.8462
+```
 
-### Decision Tree
-Accuracy: 0.7914
-Precision: 0.6345
-Recall: 0.5130
+Decision Tree:
+
+```text
 F1: 0.5649
 ROC-AUC: 0.8289
+```
 
-### Random Forest
-Accuracy: 0.7593
-Precision: 0.5315
-Recall: 0.7913
+Random Forest:
+
+```text
 F1: 0.6357
 ROC-AUC: 0.8460
+```
 
-## Random Forest Tuning
-Search space:
-- n_estimators: 100, 200
-- max_depth: 5, 8, 12
-- min_samples_split: 2, 5
+## Evaluation Issue Found
 
-Best parameters:
-- n_estimators = 100
-- max_depth = 8
-- min_samples_split = 5
+The earlier test split was reused for threshold and model decisions.
 
-Best CV F1:
-0.6364
+This meant it should not be described as fully untouched.
 
-## Corrected Final Evaluation Design
-The earlier test set had been used repeatedly during model comparison, so it was no longer treated as a true final test set.
+The workflow was revised to use separate training, validation, and held-out test splits.
 
-A new split was created:
+## Revised Split
 
-- Training: 4,930
-- Validation: 1,056
-- Final test: 1,057
+```text
+Train: 4930
+Validation: 1056
+Test: 1057
+```
 
-Churn rate remained approximately 26.5% across all splits.
+## Revised Training-Only RF Tuning
 
-## Validation Results
+Grid:
 
-### Logistic Regression at threshold 0.30
-Precision: 0.5188
-Recall: 0.7893
-F1: 0.6261
+```text
+n_estimators: 100, 200
+max_depth: 5, 8, 12
+min_samples_split: 2, 5
+```
+
+Best:
+
+```text
+max_depth=8
+min_samples_split=2
+n_estimators=100
+Best training CV F1=0.6331
+```
+
+## Primary Cost Scenario
+
+```text
+FP cost = 1
+FN cost = 5
+```
+
+These are simulated cost units.
+
+## Validation Comparison
+
+Logistic Regression:
+
+```text
+Threshold: 0.17
+Precision: 0.4491
+Recall: 0.9143
+F1: 0.6024
 ROC-AUC: 0.8454
+Flagged: 53.98%
+FP: 314
+FN: 24
+Cost: 434
+```
 
-### Random Forest
-Accuracy: 0.7509
-Precision: 0.5192
-Recall: 0.8214
-F1: 0.6362
-ROC-AUC: 0.8422
+Random Forest:
+
+```text
+Threshold: 0.36
+Precision: 0.4490
+Recall: 0.8964
+F1: 0.5983
+ROC-AUC: 0.8433
+Flagged: 52.94%
+FP: 308
+FN: 29
+Cost: 453
+```
 
 ## Selected Model
-Random Forest
+
+Under the primary 1:5 cost scenario:
+
+```text
+Logistic Regression
+Threshold = 0.17
+```
 
 Reason:
-The Random Forest achieved higher recall and F1 while maintaining similar precision to Logistic Regression at the business-oriented threshold.
 
-## Final Held-Out Test Results
-Accuracy: 0.7588
-Precision: 0.5319
-Recall: 0.7722
-F1: 0.6299
-ROC-AUC: 0.8390
+- lower validation cost
+- slightly higher recall
+- slightly higher F1
+- slightly higher ROC-AUC
+- simpler model
+
+This does not imply universal superiority.
+
+## Final Held-Out Results — Logistic Regression
+
+```text
+Accuracy:  0.6868
+Precision: 0.4547
+Recall:    0.8932
+F1:        0.6026
+ROC-AUC:   0.8448
+Flagged:   52.22%
+```
 
 Confusion matrix:
-- TN: 585
-- FP: 191
-- FN: 64
-- TP: 217
 
-## Explainability
-Top permutation-importance features:
-- Contract
-- InternetService
-- tenure
-- TotalCharges
-- PaperlessBilling
-- OnlineBackup
-- StreamingTV
-- PaymentMethod
+```text
+TN 475
+FP 301
+FN 30
+TP 251
+```
 
-## Notes
-- Feature importance indicates predictive usefulness, not causation.
-- Final test results should not be used for further tuning.
-- Future work should include monitoring, drift detection, calibration, cost-sensitive evaluation, and retraining strategy.
+Cost:
+
+```text
+451
+```
+
+## Final Held-Out Results — Random Forest
+
+```text
+Accuracy:  0.6916
+Precision: 0.4576
+Recall:    0.8648
+F1:        0.5985
+ROC-AUC:   0.8416
+Flagged:   50.24%
+```
+
+Confusion matrix:
+
+```text
+TN 488
+FP 288
+FN 38
+TP 243
+```
+
+Cost:
+
+```text
+478
+```
+
+## Bootstrap 95% Confidence Intervals
+
+Logistic Regression:
+
+```text
+Precision: 0.4141–0.4991
+Recall:    0.8561–0.9278
+F1:        0.5617–0.6423
+ROC-AUC:   0.8199–0.8712
+```
+
+Random Forest:
+
+```text
+Precision: 0.4159–0.5019
+Recall:    0.8253–0.9055
+F1:        0.5570–0.6392
+ROC-AUC:   0.8169–0.8674
+```
+
+The intervals overlap substantially.
+
+## Cost Sensitivity
+
+| FN Cost | Winner | Threshold | Recall | Flagged | Cost |
+|---:|---|---:|---:|---:|---:|
+| 2 | Random Forest | 0.59 | 0.7429 | 35.13% | 307 |
+| 3 | Random Forest | 0.52 | 0.8071 | 40.53% | 364 |
+| 5 | Logistic Regression | 0.17 | 0.9143 | 53.98% | 434 |
+| 10 | Random Forest | 0.24 | 0.9571 | 63.73% | 525 |
+| 20 | Logistic Regression | 0.06 | 0.9786 | 71.88% | 605 |
+
+Conclusion:
+
+> Preferred model and threshold depend on business cost assumptions and operational capacity.
+
+## Deployment Update
+
+The saved model artifact now includes:
+
+```text
+model
+threshold
+model_name
+false_positive_cost
+false_negative_cost
+```
+
+This prevents analysis/deployment threshold mismatch.
+
+## API Validation Update
+
+The API now rejects:
+
+- invalid categorical values
+- negative tenure
+- invalid charge values
+- inconsistent phone-service states
+- inconsistent internet-service states
+
+Current automated test result:
+
+```text
+6 passed
+```
+
+## Current Final Conclusion
+
+The project no longer claims Random Forest is universally better.
+
+The correct conclusion is:
+
+> Logistic Regression was selected under the primary simulated 1:5 cost scenario because it produced the lowest validation cost. Random Forest remained competitive, and sensitivity analysis showed that different business assumptions can change the preferred model and threshold.

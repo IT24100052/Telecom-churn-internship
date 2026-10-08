@@ -2,12 +2,19 @@
 
 This folder is reserved for exploratory Jupyter notebooks.
 
-The main project workflow was implemented as reusable Python scripts inside `src/` so that the analysis, preprocessing, model training, and deployment steps remain reproducible and easier to maintain.
+The main workflow is implemented as reusable Python modules under `src/` because scripts are easier to:
 
-Future notebooks may include:
+- reproduce
+- test
+- version-control
+- deploy
+- maintain
 
-- Extended exploratory data analysis
-- Visualization experiments
-- Feature engineering experiments
-- Model interpretation
+Possible future notebooks:
+
+- extended EDA
+- threshold visualizations
 - SHAP analysis
+- calibration
+- campaign-capacity analysis
+- fairness analysis
