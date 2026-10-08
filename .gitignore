@@ -1,4 +1,4 @@
-.venv/
+﻿.venv/
 __pycache__/
 *.pyc
 .env
@@ -10,3 +10,6 @@ data/processed/*.csv
 data/processed/*.db
 
 models/*.joblib
+docs/setup.md
+docs/supervisor_questions_answers.md
+docs/project_complete_notes.md
