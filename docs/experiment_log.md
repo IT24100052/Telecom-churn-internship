@@ -324,8 +324,28 @@ Current automated test result:
 
 ## Current Final Conclusion
 
-The project no longer claims Random Forest is universally better.
+The project no longer claims that Random Forest is universally better.
 
-The correct conclusion is:
+Under the primary simulated 1:5 cost scenario, Logistic Regression was selected using the validation set because it produced the lower validation cost:
 
-> Logistic Regression was selected under the primary simulated 1:5 cost scenario because it produced the lowest validation cost. Random Forest remained competitive, and sensitivity analysis showed that different business assumptions can change the preferred model and threshold.
+```text
+Logistic Regression: 434 units
+Random Forest:       453 units
+```
+
+On the held-out test split, Logistic Regression also had the lower observed simulated cost:
+
+```text
+Logistic Regression: 451 units
+Random Forest:       478 units
+```
+
+However, the paired-bootstrap comparison showed that the 95% confidence interval for the Logistic Regression minus Random Forest cost difference included zero.
+
+Therefore, the evidence is not strong enough to conclude that Logistic Regression consistently has lower business cost than Random Forest.
+
+The final interpretation is:
+
+> Logistic Regression and Random Forest are broadly competitive under the simulated 1:5 cost scenario. Logistic Regression remains the deployment model because it achieved competitive predictive performance and observed cost while also being simpler and easier to interpret. Cost-sensitivity analysis further showed that the preferred model and decision threshold can change when business assumptions change.
+
+The project therefore treats model selection as a business and statistical trade-off rather than declaring one algorithm universally superior.
