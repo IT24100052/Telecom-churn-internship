@@ -127,6 +127,13 @@ class CustomerInput(BaseModel):
         return self
 
 
+class PredictionResponse(BaseModel):
+    prediction: Literal["Churn", "No Churn"]
+    churn_probability: float
+    decision_threshold: float
+    model: str
+
+
 @app.get("/")
 def root():
     return {
@@ -141,7 +148,10 @@ def health():
     }
 
 
-@app.post("/predict")
+@app.post(
+    "/predict",
+    response_model=PredictionResponse,
+)
 def predict(customer: CustomerInput):
     customer_data = customer.model_dump()
     return predict_churn(customer_data)
