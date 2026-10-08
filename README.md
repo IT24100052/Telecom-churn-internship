@@ -248,6 +248,43 @@ Simulated business cost:
 451 units
 ```
 
+## Logistic Regression vs Random Forest: Paired Bootstrap Check
+
+The two candidate models were also compared using a paired bootstrap on the same final test customers.
+
+For each bootstrap sample, the same resampled customer indices were used for both models. This directly estimates uncertainty in the business-cost difference between Logistic Regression and Random Forest.
+
+Under the simulated cost assumption:
+
+- false positive cost = 1 unit
+- false negative cost = 5 units
+
+Observed test costs were:
+
+- Logistic Regression: 451 units
+- Random Forest: 478 units
+- observed difference (LR - RF): -27 units
+
+Across 1,000 paired bootstrap samples:
+
+- mean LR - RF cost difference: -26.17 units
+- median difference: -26 units
+- 95% bootstrap interval: [-66.03, 14.00]
+- Logistic Regression had lower cost in 89.5% of bootstrap samples
+
+Because the 95% interval includes zero, the evidence is not strong enough to conclude that Logistic Regression consistently has lower business cost than Random Forest.
+
+Therefore, the two models should be treated as broadly competitive under this simulated scenario.
+
+Logistic Regression remains the deployment model because:
+
+- its observed cost is slightly lower,
+- its predictive performance is competitive,
+- it is simpler,
+- and it is easier to interpret and explain.
+
+The model choice should therefore not be described as a decisive performance win over Random Forest.
+
 ## Business-Rule Baseline Comparison
 
 To check whether the machine-learning model adds value beyond a simple operational rule, the final held-out test split was also evaluated using several baselines under the same simulated cost assumption:
