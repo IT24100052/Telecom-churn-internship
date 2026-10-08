@@ -17,12 +17,28 @@ The model is intended to support human decision-making.
 
 ## Dataset
 
-Public telecom churn dataset:
+This project uses the IBM Telco Customer Churn sample dataset.
 
-- 7,043 customers
-- 21 original columns
+Primary source used for this project:
 
-No confidential SLT-MOBITEL data was used.
+- Dataset name: Telco Customer Churn
+- File: `WA_Fn-UseC_-Telco-Customer-Churn.csv`
+- Original IBM sample repository: IBM `telco-customer-churn-on-icp4d`
+- Kaggle mirror: `blastchar/telco-customer-churn`
+
+The dataset contains 7,043 customers and 21 original columns.
+
+The raw CSV is intentionally not committed to this repository. Download the dataset from the original IBM source or the Kaggle mirror and place it at `data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv`.
+
+### Dataset Licence / Usage Note
+
+The commonly used Kaggle listing for this dataset states:
+
+`Data files © Original Authors`
+
+Because the dataset does not present a clearly stated permissive licence on that listing, this repository does not redistribute the raw CSV.
+
+Users should obtain the dataset from the original source or a trusted mirror and follow the source's usage terms.
 
 ## Main Data Quality Finding
 
